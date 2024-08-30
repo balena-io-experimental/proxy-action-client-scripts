@@ -22,6 +22,9 @@ Options:
     -f, --follow
         Follow HUP progress to completion.
 
+    --follow-host
+        API host to follow progress; defaults to "api.balena-cloud.com".
+
     -r, --response
         Show HTTP response output.
 
@@ -55,6 +58,10 @@ while [ "$#" -gt "0" ]; do
         -f|--follow)
             FOLLOW=1
             ;;
+        --follow-host)
+            FOLLOW_HOST=$2
+            shift
+            ;;
         -r|--response)
             RESPONSE=1
             ;;
@@ -81,6 +88,10 @@ fi
 if [ -z "${API_TOKEN}" ]; then
     echo "[ERROR] hup-device-v2 : API token not provided"
     exit 1
+fi
+
+if [ -z "${FOLLOW_HOST}" ]; then
+    FOLLOW_HOST="api.balena-cloud.com"
 fi
 
 if [ -z "${OS_VERSION}" ]; then
@@ -143,8 +154,8 @@ if [ -z "${FOLLOW}" ] || [ "${res}" != 0 ]; then
     exit $res
 fi
 
-# Print device status, provisioning_progress, and provisioning_state updates until
-# progress reaches 100%.
+# Print device status, provisioning_progress, and provisioning_state updates as
+# they change.
 progress=""
 last_status=""
 last_progress=""
@@ -152,28 +163,39 @@ last_prov_state=""
 printf "%8s  %12s  %3s  %16s\n" "  Time  " "   Status   " "Pct" "     Detail             "
 echo "--------  ------------  ---  ------------------------"
 
-while [ true ]
+# ensure we cleanup
+outfile=$(mktemp)
+trap 'rm -f ${outfile};exit' ERR INT TERM
+
+while [ 0 ]
 do
-    device=$(curl "https://api.d90c5192ae585eaed21f1f48258c954c.bob.local/v6/device(uuid='${UUID}')" \
+    status_code=$(curl "https://${FOLLOW_HOST}/v6/device(uuid='${UUID}')" \
+        -w "%{http_code}" \
+        -o "${outfile}" \
         --no-progress-meter \
         --header "Authorization: Bearer ${API_TOKEN}" \
         --header "Content-Type: application/json")
 
-    status=$(echo "${device}" | jq -r '.d[0] | .status')
-    progress=$(echo "${device}" | jq -r '.d[0] | .provisioning_progress')
-    prov_state=$(echo "${device}" | jq -r '.d[0] | .provisioning_state')
-    # to keep output clean
-    if [ "${progress}" = "null" ]; then
-        progress=""
-    fi
-    # Only print if changed
-    if [ "${status}" != "${last_status}" ] || [ "${progress}" != "${last_progress}" ] || [ "${prov_state}" != "${last_prov_state}" ]; then
-        tstamp=$(date +"%H:%M:%S")
-        printf "%8s  %-12.12s  %3.3s  %-24.24s\n" "${tstamp}" "${status}" "${progress}" "${prov_state}"
+    if [ "${status_code:0:1}" != "2" ]; then
+        echo "[ERROR] code: ${status_code}"
+    else
+        status=$(cat "${outfile}" | jq -r '.d[0] | .status')
+        progress=$(cat "${outfile}" | jq -r '.d[0] | .provisioning_progress')
+        prov_state=$(cat "${outfile}" | jq -r '.d[0] | .provisioning_state')
+        # to keep output clean
+        if [ "${progress}" = "null" ]; then
+            progress=""
+        fi
+        # Only print if changed
+        if [ "${status}" != "${last_status}" ] || [ "${progress}" != "${last_progress}" ] || [ "${prov_state}" != "${last_prov_state}" ]; then
+            tstamp=$(date +"%H:%M:%S")
+            printf "%8s  %-12.12s  %3.3s  %-24.24s\n" "${tstamp}" "${status}" "${progress}" "${prov_state}"
 
-        last_status="${status}"
-        last_progress="${progress}"
-        last_prov_state="${prov_state}"
+            last_status="${status}"
+            last_progress="${progress}"
+            last_prov_state="${prov_state}"
+        fi
     fi
     sleep 3
 done
+
