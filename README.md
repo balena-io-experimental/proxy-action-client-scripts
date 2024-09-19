@@ -8,9 +8,10 @@ The example below includes the HTTP response, as well as output from following t
 
 
 ```
-export API_TOKEN="$(cat < ${BALENARC_DATA_DIRECTORY}/token)"
+$ export API_TOKEN="$(cat < ${BALENARC_DATA_DIRECTORY}/token)"
 
-hup-device.sh -e actions.balena-devices.com/v2 -u 3a6c9251d533e064f34ca924458d7e23 -v "6.0.10" -r -f
+$ ./hup-device.sh -e actions.balena-devices.com/v2 -u 3a6c9251d533e064f34ca924458d7e23 \
+   -v "6.0.10" -r -f
 [INFO] code: 202
 [INFO] response: {"status":"triggered","lastRun":1724944519887,"parameters":{"target_version":"6.0.10"},"action":"resinhup"}
 
