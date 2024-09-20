@@ -13,13 +13,13 @@ $ ./hup-device.sh -u 3a6c9251d533e064f34ca924458d7e23 \
 [INFO] code: 202
 [INFO] response: {"status":"triggered","lastRun":1724944519887,"parameters":{"target_version":"6.0.10"},"action":"resinhup"}
 
-  Time       Status     Pct       Detail             
---------  ------------  ---  ------------------------
-11:15:20  Idle                                       
-11:15:23  configuring    50  Running OS update       
-11:16:44  configuring    95  Running supervisor updat
-11:17:00  configuring   100  Update successful, reboo
-11:17:09  configuring   100  Reboot in progress      
-11:18:19  Idle                                       
+  Time       Status     Pct         Detail                 
+--------  ------------  ---  ------------------------------
+19:11:38  Idle                                             
+19:11:41  configuring    25  Preparing OS update           
+19:11:44  configuring    50  Running OS update             
+19:13:06  configuring   100  Update successful, rebooting  
+19:13:16  configuring   100  Reboot in progress            
+19:14:24  Idle                                             
 ```
 

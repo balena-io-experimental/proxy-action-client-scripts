@@ -153,8 +153,8 @@ progress=""
 last_status=""
 last_progress=""
 last_prov_state=""
-printf "%8s  %12s  %3s  %16s\n" "  Time  " "   Status   " "Pct" "     Detail             "
-echo "--------  ------------  ---  ------------------------"
+printf "\n%8s  %12s  %3s  %30s\n" "  Time  " "   Status   " "Pct" "       Detail                 "
+echo "--------  ------------  ---  ------------------------------"
 
 # ensure we cleanup
 outfile=$(mktemp)
@@ -182,7 +182,7 @@ do
         # Only print if changed
         if [ "${status}" != "${last_status}" ] || [ "${progress}" != "${last_progress}" ] || [ "${prov_state}" != "${last_prov_state}" ]; then
             tstamp=$(date +"%H:%M:%S")
-            printf "%8s  %-12.12s  %3.3s  %-24.24s\n" "${tstamp}" "${status}" "${progress}" "${prov_state}"
+            printf "%8s  %-12.12s  %3.3s  %-30.30s\n" "${tstamp}" "${status}" "${progress}" "${prov_state}"
 
             last_status="${status}"
             last_progress="${progress}"
