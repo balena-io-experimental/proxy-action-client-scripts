@@ -16,8 +16,7 @@ Options:
         Run HUP in debug mode on device.
 
     -e, --endpoint ACTIONS_ENDPOINT
-        Actions host endpoint; defaults to "actions.balena-devices.com/v1".
-        Use "actions.devices.<cloud-uuid>.bob.local/v1" for a local balena-cloud.
+        Actions host endpoint; defaults to "actions.balena-devices.com/v2".
 
     -f, --follow
         Follow HUP progress to completion.
@@ -82,7 +81,7 @@ done
 
 # Fail if missing arguments
 if [ -z "${ACTIONS_ENDPOINT}" ]; then
-    ACTIONS_ENDPOINT="actions.balena-devices.com/v1"
+    ACTIONS_ENDPOINT="actions.balena-devices.com/v2"
 fi
 
 if [ -z "${API_TOKEN}" ]; then
