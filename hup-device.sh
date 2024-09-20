@@ -24,9 +24,6 @@ Options:
     --follow-host
         API host to follow progress; defaults to "api.balena-cloud.com".
 
-    -r, --response
-        Show HTTP response output.
-
     -u, --uuid uuid
         UUID for device to HUP; must use long UUID.
 
@@ -60,9 +57,6 @@ while [ "$#" -gt "0" ]; do
         --follow-host)
             follow_host=$2
             shift
-            ;;
-        -r|--response)
-            response=1
             ;;
         -v|--version)
             os_version=$2
@@ -143,10 +137,10 @@ if [ -s "${errfile}" ]; then
 fi
 rm -f "${errfile}"
 
-if [ -n "${response}" ] && [ -s "${outfile}" ]; then
+if [ -s "${outfile}" ]; then
     echo "[INFO] response: $(cat "${outfile}")"
+    rm -f "${outfile}"
 fi
-rm -f "${outfile}"
 
 # Only concerned with following HUP progress below.
 if [ -z "${follow}" ] || [ "${res}" != 0 ]; then
