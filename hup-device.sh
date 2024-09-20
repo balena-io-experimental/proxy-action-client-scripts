@@ -28,11 +28,11 @@ Options:
     -r, --response
         Show HTTP response output.
 
-    -u, --uuid UUID
+    -u, --uuid uuid
         UUID for device to HUP; must use long UUID.
 
-    -v, --version OS_VERSION
-        Target OS_VERSION for HUP.
+    -v, --version os_version
+        Target os_version for HUP.
 EOF
 }
 
@@ -49,28 +49,28 @@ while [ "$#" -gt "0" ]; do
             shift
             ;;
         -d|--debug)
-            DEBUG=1
+            debug=1
             ;;
         -e|--endpoint)
             ACTIONS_ENDPOINT=$2
             shift
             ;;
         -f|--follow)
-            FOLLOW=1
+            follow=1
             ;;
         --follow-host)
-            FOLLOW_HOST=$2
+            follow_host=$2
             shift
             ;;
         -r|--response)
-            RESPONSE=1
+            response=1
             ;;
         -v|--version)
-            OS_VERSION=$2
+            os_version=$2
             shift
             ;;
         -u|--uuid)
-            UUID=$2
+            uuid=$2
             shift
             ;;
         *)
@@ -90,16 +90,16 @@ if [ -z "${API_TOKEN}" ]; then
     exit 1
 fi
 
-if [ -z "${FOLLOW_HOST}" ]; then
-    FOLLOW_HOST="api.balena-cloud.com"
+if [ -z "${follow_host}" ]; then
+    follow_host="api.balena-cloud.com"
 fi
 
-if [ -z "${OS_VERSION}" ]; then
+if [ -z "${os_version}" ]; then
     echo "[ERROR] hup-device-v2 : target OS version not provided"
     exit 1
 fi
 
-if [ -z "${UUID}" ]; then
+if [ -z "${uuid}" ]; then
     echo "[ERROR] hup-device-v2 : UUID not provided"
     exit 1
 fi
@@ -107,14 +107,14 @@ fi
 # Execute HUP request
 outfile=$(mktemp)
 errfile=$(mktemp)
-if [ -n "${DEBUG}" ]; then
+if [ -n "${debug}" ]; then
     debug_param=", \"debug\": true"
 else
     debug_param=""
 fi
 
 status_code=$(\
-    curl -s -X POST "https://${ACTIONS_ENDPOINT}/${UUID}/resinhup" \
+    curl -s -X POST "https://${ACTIONS_ENDPOINT}/${uuid}/resinhup" \
         --show-error \
         -w "%{http_code}" \
         -L \
@@ -122,7 +122,7 @@ status_code=$(\
         --retry 3 \
         --header "Authorization: Bearer ${API_TOKEN}" \
         --header "Content-Type: application/json" \
-        --data "{ \"parameters\": { \"target_version\": \"${OS_VERSION}\" ${debug_param} } }" \
+        --data "{ \"parameters\": { \"target_version\": \"${os_version}\" ${debug_param} } }" \
         2> "${errfile}"
     )
 
@@ -144,13 +144,13 @@ if [ -s "${errfile}" ]; then
 fi
 rm -f "${errfile}"
 
-if [ -n "${RESPONSE}" ] && [ -s "${outfile}" ]; then
+if [ -n "${response}" ] && [ -s "${outfile}" ]; then
     echo "[INFO] response: $(cat "${outfile}")"
 fi
 rm -f "${outfile}"
 
 # Only concerned with following HUP progress below.
-if [ -z "${FOLLOW}" ] || [ "${res}" != 0 ]; then
+if [ -z "${follow}" ] || [ "${res}" != 0 ]; then
     exit $res
 fi
 
@@ -169,7 +169,7 @@ trap 'rm -f ${outfile};exit' ERR INT TERM
 
 while [ 0 ]
 do
-    status_code=$(curl "https://${FOLLOW_HOST}/v6/device(uuid='${UUID}')" \
+    status_code=$(curl "https://${follow_host}/v6/device(uuid='${uuid}')" \
         -w "%{http_code}" \
         -o "${outfile}" \
         --no-progress-meter \
